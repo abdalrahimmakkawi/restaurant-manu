@@ -1,22 +1,34 @@
 import { createClient } from '@supabase/supabase-js'
 import { Dish, DishType, CreateDishRequest, UpdateDishRequest, ImportResult } from '@/types/dish'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+let supabase: ReturnType<typeof createClient> | null = null
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const getSupabaseClient = () => {
+  if (!supabase) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Supabase URL and Anon Key are required')
+    }
+    
+    supabase = createClient(supabaseUrl, supabaseAnonKey)
+  }
+  return supabase
+}
 
 export class DishService {
   static async getAllDishes(): Promise<Dish[]> {
     try {
-      const { data, error } = await supabase
+      const client = getSupabaseClient()
+      const { data, error } = await client
         .from('dishes')
         .select('*')
         .order('created_at', { ascending: false })
 
       if (error) throw error
 
-      return data.map(dish => ({
+      return (data as any[]).map((dish: any) => ({
         ...dish,
         type: dish.type as DishType,
         createdAt: new Date(dish.created_at),
@@ -30,7 +42,8 @@ export class DishService {
 
   static async getDishById(dishId: string): Promise<Dish | null> {
     try {
-      const { data, error } = await supabase
+      const client = getSupabaseClient()
+      const { data, error } = await client
         .from('dishes')
         .select('*')
         .eq('dish_id', dishId)
@@ -38,11 +51,12 @@ export class DishService {
 
       if (error) throw error
 
+      const dish = data as any
       return {
-        ...data,
-        type: data.type as DishType,
-        createdAt: new Date(data.created_at),
-        updatedAt: new Date(data.updated_at)
+        ...dish,
+        type: dish.type as DishType,
+        createdAt: new Date(dish.created_at),
+        updatedAt: new Date(dish.updated_at)
       }
     } catch (error) {
       console.error('Error fetching dish:', error)
@@ -52,7 +66,8 @@ export class DishService {
 
   static async searchDishes(query: string): Promise<Dish[]> {
     try {
-      const { data, error } = await supabase
+      const client = getSupabaseClient()
+      const { data, error } = await client
         .from('dishes')
         .select('*')
         .or(`name.ilike.%${query}%,dish_id.ilike.%${query}%`)
@@ -60,7 +75,7 @@ export class DishService {
 
       if (error) throw error
 
-      return data.map(dish => ({
+      return (data as any[]).map((dish: any) => ({
         ...dish,
         type: dish.type as DishType,
         createdAt: new Date(dish.created_at),
@@ -74,7 +89,8 @@ export class DishService {
 
   static async createDish(dishData: CreateDishRequest): Promise<Dish> {
     try {
-      const { data, error } = await supabase
+      const client = getSupabaseClient()
+      const { data, error } = await client
         .from('dishes')
         .insert([{
           dish_id: dishData.dishId,
@@ -86,17 +102,18 @@ export class DishService {
           photo_url: dishData.photoUrl || null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        }])
+        }] as any)
         .select()
         .single()
 
       if (error) throw error
 
+      const dish = data as any
       return {
-        ...data,
-        type: data.type as DishType,
-        createdAt: new Date(data.created_at),
-        updatedAt: new Date(data.updated_at)
+        ...dish,
+        type: dish.type as DishType,
+        createdAt: new Date(dish.created_at),
+        updatedAt: new Date(dish.updated_at)
       }
     } catch (error) {
       console.error('Error creating dish:', error)
@@ -106,6 +123,7 @@ export class DishService {
 
   static async updateDish(dishId: string, dishData: UpdateDishRequest): Promise<Dish> {
     try {
+      const client = getSupabaseClient()
       const updateData: any = {
         ...dishData,
         updated_at: new Date().toISOString()
@@ -115,7 +133,7 @@ export class DishService {
         updateData.photo_url = dishData.photoUrl
       }
 
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from('dishes')
         .update(updateData)
         .eq('dish_id', dishId)
@@ -124,11 +142,12 @@ export class DishService {
 
       if (error) throw error
 
+      const dish = data as any
       return {
-        ...data,
-        type: data.type as DishType,
-        createdAt: new Date(data.created_at),
-        updatedAt: new Date(data.updated_at)
+        ...dish,
+        type: dish.type as DishType,
+        createdAt: new Date(dish.created_at),
+        updatedAt: new Date(dish.updated_at)
       }
     } catch (error) {
       console.error('Error updating dish:', error)
@@ -138,7 +157,8 @@ export class DishService {
 
   static async deleteDish(dishId: string): Promise<void> {
     try {
-      const { error } = await supabase
+      const client = getSupabaseClient()
+      const { error } = await client
         .from('dishes')
         .delete()
         .eq('dish_id', dishId)
@@ -152,19 +172,20 @@ export class DishService {
 
   static async getDishStats(): Promise<any> {
     try {
-      const { data: dishes, error } = await supabase
+      const client = getSupabaseClient()
+      const { data: dishes, error } = await client
         .from('dishes')
         .select('type, price')
 
       if (error) throw error
 
       const totalDishes = dishes.length
-      const totalValue = dishes.reduce((sum, dish) => sum + dish.price, 0)
+      const totalValue = dishes.reduce((sum: number, dish: any) => sum + dish.price, 0)
       const averagePrice = totalDishes > 0 ? Math.round(totalValue / totalDishes) : 0
 
       // Count by type
       const typeCounts: Record<string, number> = {}
-      dishes.forEach(dish => {
+      dishes.forEach((dish: any) => {
         typeCounts[dish.type] = (typeCounts[dish.type] || 0) + 1
       })
 

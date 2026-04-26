@@ -1,0 +1,12 @@
+node_modules
+NusantaraDishManager
+NusantaraDishManager-Java
+*.jar
+*.class
+target
+out
+.next
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
