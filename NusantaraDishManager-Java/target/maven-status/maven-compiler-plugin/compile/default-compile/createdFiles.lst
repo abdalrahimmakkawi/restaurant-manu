@@ -1,0 +1,16 @@
+com\nusantara\dishmanager\dto\UserDto$UserDtoBuilder.class
+com\nusantara\dishmanager\NusantaraDishManagerApplication.class
+com\nusantara\dishmanager\controller\DishController.class
+com\nusantara\dishmanager\controller\UserController.class
+com\nusantara\dishmanager\entity\User.class
+com\nusantara\dishmanager\repository\UserRepository.class
+com\nusantara\dishmanager\dto\DishDto$DishDtoBuilder.class
+com\nusantara\dishmanager\dto\UserDto.class
+com\nusantara\dishmanager\repository\DishRepository.class
+com\nusantara\dishmanager\entity\User$UserBuilder.class
+com\nusantara\dishmanager\service\UserService.class
+com\nusantara\dishmanager\entity\Dish$DishType.class
+com\nusantara\dishmanager\entity\Dish.class
+com\nusantara\dishmanager\entity\Dish$DishBuilder.class
+com\nusantara\dishmanager\service\DishService.class
+com\nusantara\dishmanager\dto\DishDto.class

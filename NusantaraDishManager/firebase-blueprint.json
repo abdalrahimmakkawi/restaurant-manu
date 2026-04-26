@@ -1,0 +1,28 @@
+{
+  "entities": {
+    "Dish": {
+      "title": "Dish",
+      "description": "Information about a restaurant dish",
+      "type": "object",
+      "properties": {
+        "dishId": { "type": "string", "description": "Unique identifier for the dish" },
+        "name": { "type": "string", "description": "Name of the dish" },
+        "type": { "type": "string", "description": "Category of the dish (e.g., Appetizer, Main Course, Dessert)" },
+        "price": { "type": "number", "description": "Price of the dish" },
+        "ingredients": { "type": "string", "description": "List of ingredients" },
+        "introduction": { "type": "string", "description": "Brief description of the dish" },
+        "photoUrl": { "type": "string", "description": "URL to the dish's photograph" },
+        "userId": { "type": "string", "description": "UID of the user who created this entry" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["dishId", "name", "type", "price", "userId"]
+    }
+  },
+  "firestore": {
+    "dishes/{dishId}": {
+      "schema": "Dish",
+      "description": "Collection of dishes managed by users"
+    }
+  }
+}
